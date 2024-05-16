@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"cats-social/model/database"
 	"context"
 	"database/sql"
+	"health-record/model/database"
 )
 
 type UserRepository struct {

@@ -1,4 +1,4 @@
-module cats-social
+module health-record
 
 go 1.19
 

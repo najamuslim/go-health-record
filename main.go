@@ -1,15 +1,15 @@
 package main
 
 import (
-	"cats-social/app/server"
-	"cats-social/db"
-	"cats-social/helpers"
-	"cats-social/model/properties"
-	"cats-social/src/handler"
-	"cats-social/src/middleware"
-	"cats-social/src/repository"
-	"cats-social/src/usecase"
 	"fmt"
+	"health-record/app/server"
+	"health-record/db"
+	"health-record/helpers"
+	"health-record/model/properties"
+	"health-record/src/handler"
+	"health-record/src/middleware"
+	"health-record/src/repository"
+	"health-record/src/usecase"
 	"os"
 
 	"github.com/gin-gonic/gin"

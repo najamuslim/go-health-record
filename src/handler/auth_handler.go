@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"cats-social/model/dto"
-	"cats-social/src/usecase"
 	"errors"
+	"health-record/model/dto"
+	"health-record/src/usecase"
 	"log"
 	"regexp"
 

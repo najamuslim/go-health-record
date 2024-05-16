@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"cats-social/helpers"
 	"fmt"
+	"health-record/helpers"
 	"net/http"
 	"strconv"
 	"strings"

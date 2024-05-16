@@ -1,8 +1,8 @@
 package db
 
 import (
-	"cats-social/model/properties"
 	"database/sql"
+	"health-record/model/properties"
 	"log"
 
 	_ "github.com/lib/pq"

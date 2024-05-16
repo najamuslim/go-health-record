@@ -1,13 +1,13 @@
 package usecase
 
 import (
-	"cats-social/helpers"
-	"cats-social/model/database"
-	"cats-social/model/dto"
-	"cats-social/src/repository"
 	"context"
 	"errors"
 	"fmt"
+	"health-record/helpers"
+	"health-record/model/database"
+	"health-record/model/dto"
+	"health-record/src/repository"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
