@@ -1,6 +1,6 @@
 package helpers
 
 type HelperInterface interface {
-	GenerateToken(catId int) (string, error)
+	GenerateToken(userId string) (string, error)
 	ValidateJWT(tokenString string) (*Claims, error)
 }

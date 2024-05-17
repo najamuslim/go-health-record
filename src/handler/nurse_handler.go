@@ -60,7 +60,7 @@ func (h *NurseHandler) RegisterNurse(c *gin.Context) {
 	})
 }
 
-func ValidateRegisterNurseRequest(nip, name string) error {
+func ValidateRegisterNurseRequest(nip int64, name string) error {
 	// Validate email format
 	if !isValidNip(nip) {
 		return errors.New("email must be in valid email format")
@@ -74,7 +74,7 @@ func ValidateRegisterNurseRequest(nip, name string) error {
 	return nil
 }
 
-func ValidateLoginNurseRequest(nip, password string) error {
+func ValidateLoginNurseRequest(nip int64, password string) error {
 	// Validate email format
 	if !isValidNip(nip) {
 		return errors.New("email must be in valid email format")

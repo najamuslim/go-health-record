@@ -20,7 +20,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func (h *Helpers) GenerateToken(userID int) (string, error) {
+func (h *Helpers) GenerateToken(userID string) (string, error) {
 	key := []byte(os.Getenv("JWT_SECRET"))
 
 	claims := jwt.MapClaims{

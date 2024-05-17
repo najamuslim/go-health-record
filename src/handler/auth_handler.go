@@ -6,6 +6,7 @@ import (
 	"health-record/src/usecase"
 	"log"
 	"regexp"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,10 +37,10 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	// Check if email already exists
-	exists, _ := h.iAuthUsecase.GetUserByEmail(request.Nip)
+	exists, _ := h.iAuthUsecase.GetUserByNIP(request.Nip)
 	if exists {
 		log.Println("Register bad request ", err)
-		c.JSON(409, gin.H{"status": "bad request", "message": "email already exists"})
+		c.JSON(409, gin.H{"status": "bad request", "message": "nip already exists"})
 		return
 	}
 
@@ -94,7 +95,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(200, gin.H{
     "message": "User logged successfully",
     "data": gin.H{
-			"email": userData.Nip, 
+			"nip": userData.Nip, 
 			"name": userData.Name, 
       "accessToken": token,
 		},
@@ -102,7 +103,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 // ValidateRegisterRequest validates the register user request payload
-func ValidateRegisterRequest(nip, name, password string) error {
+func ValidateRegisterRequest(nip int64, name, password string) error {
 	// Validate email format
 	if !isValidNip(nip) {
 		return errors.New("email must be in valid email format")
@@ -121,10 +122,10 @@ func ValidateRegisterRequest(nip, name, password string) error {
 	return nil
 }
 
-func ValidateLoginRequest(nip, password string) error {
+func ValidateLoginRequest(nip int64, password string) error {
 	// Validate email format
 	if !isValidNip(nip) {
-		return errors.New("email must be in valid email format")
+		return errors.New("nip must be in valid email format")
 	}
 
 	// Validate password length
@@ -136,9 +137,9 @@ func ValidateLoginRequest(nip, password string) error {
 }
 
 // Helper function to validate email format
-func isValidNip(nip string) bool {
+func isValidNip(nip int64) bool {
 	// Regular expression pattern for email format
 	nipRegex := `^615[12][2-9][0-9]{3}(0[1-9]|1[0-2])[0-9]{3}$`
-	match, _ := regexp.MatchString(nipRegex, nip)
+	match, _ := regexp.MatchString(nipRegex, strconv.FormatInt(nip, 10))
 	return match
 }

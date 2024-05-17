@@ -40,7 +40,9 @@ func (u *AuthUsecase) Register(request dto.RequestCreateUser) (token string, err
 
 	u.iUserRepository.CreateUser(context.TODO(), data)
 
-	userData, err := u.iUserRepository.GetUserByEmail(context.TODO(), request.Nip)
+	fmt.Println(err)
+
+	userData, err := u.iUserRepository.GetUserByNIP(context.TODO(), request.Nip)
 
 	fmt.Println(userData)
 
@@ -51,7 +53,7 @@ func (u *AuthUsecase) Register(request dto.RequestCreateUser) (token string, err
 
 func (u *AuthUsecase) Login(request dto.RequestAuth) (token string, user database.User, err error) {
 	// check creds on database
-	userData, err := u.iUserRepository.GetUserByEmail(context.TODO(), request.Nip)
+	userData, err := u.iUserRepository.GetUserByNIP(context.TODO(), request.Nip)
 	if err != nil {
 		return "", database.User{}, errors.New("user not found")
 	}
@@ -76,8 +78,8 @@ func (u *AuthUsecase) verifyPassword(password, passwordHash string) bool {
 	return err == nil
 }
 
-func (u *AuthUsecase) GetUserByEmail(nip string) (bool, error) {
-	_, err := u.iUserRepository.GetUserByEmail(context.TODO(), nip)
+func (u *AuthUsecase) GetUserByNIP(nip int64) (bool, error) {
+	_, err := u.iUserRepository.GetUserByNIP(context.TODO(), nip)
 	if err != nil {
     return false, err
   }

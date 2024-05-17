@@ -9,7 +9,7 @@ import (
 type AuthUsecaseInterface interface {
 	Register(request dto.RequestCreateUser) (token string, err error)
 	Login(request dto.RequestAuth) (token string, user database.User, err error)
-	GetUserByEmail(email string) (exists bool, err error)
+	GetUserByNIP(nip int64) (exists bool, err error)
 }
 
 type NurseUsecaseInterface interface {
@@ -18,5 +18,5 @@ type NurseUsecaseInterface interface {
 	DeleteNurse(ctx context.Context, userId string) error
 	GetNurses(ctx context.Context, filters map[string]interface{}) ([]database.Nurse, error)
 	GetNurseByID(userId string) (bool, error)
-	GetNurseByNIP(nip string) (bool, error)
+	GetNurseByNIP(nip int64) (bool, error)
 }

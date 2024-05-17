@@ -54,7 +54,7 @@ func (uc *NurseUsecase) GetNurses(ctx context.Context, filters map[string]interf
 	return uc.iNurseRepository.GetNurses(ctx, filters)
 }
 
-func (u *NurseUsecase) GetNurseByNIP(nip string) (bool, error) {
+func (u *NurseUsecase) GetNurseByNIP(nip int64) (bool, error) {
 	_, err := u.iNurseRepository.GetNurseByNIP(context.TODO(), nip)
 	if err != nil {
     return false, err

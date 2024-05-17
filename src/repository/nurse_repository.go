@@ -111,7 +111,7 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-func (r *NurseRepository) GetNurseByNIP(ctx context.Context, nip string) (response database.Nurse, err error) {
+func (r *NurseRepository) GetNurseByNIP(ctx context.Context, nip int64) (response database.Nurse, err error) {
 	err = r.db.QueryRowContext(ctx, "SELECT id, name, nip, password FROM users WHERE nip = $1", nip).Scan(&response.Id, &response.Name, &response.Nip, &response.Password)
 	if err != nil {
 		return
