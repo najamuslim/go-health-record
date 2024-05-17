@@ -7,6 +7,8 @@ import (
 	"encoding/base64"
 	"health-record/model/database"
 	"health-record/model/dto"
+	"strconv"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -35,9 +37,9 @@ func (repo *NurseRepository) CreateNurse(ctx context.Context, nurse dto.RequestC
 	}
 
 	// Prepare the SQL query to insert the new nurse with the hashed password
-	const query = `INSERT INTO nurses (nip, name, identity_card_scan_img, password) VALUES ($1, $2, $3, $4) RETURNING user_id`
+	const query = `INSERT INTO users (user_id, nip, name, role, identity_card_scan_img, password, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING user_id`
 	var userId string
-	err = repo.db.QueryRowContext(ctx, query, nurse.Nip, nurse.Name, nurse.IdentityCardScanImg, hashedPassword).Scan(&userId)
+	err = repo.db.QueryRowContext(ctx, query, time.Now().UTC().Format("2006-01-02 15:04:05") + strconv.Itoa(randomInt(1, 100000)), nurse.Nip, nurse.Name, "nurse", nurse.IdentityCardScanImg, hashedPassword, time.Now()).Scan(&userId)
 	if err != nil {
 			return "", err
 	}
@@ -112,7 +114,7 @@ func HashPassword(password string) (string, error) {
 }
 
 func (r *NurseRepository) GetNurseByNIP(ctx context.Context, nip int64) (response database.Nurse, err error) {
-	err = r.db.QueryRowContext(ctx, "SELECT id, name, nip, password FROM users WHERE nip = $1", nip).Scan(&response.Id, &response.Name, &response.Nip, &response.Password)
+	err = r.db.QueryRowContext(ctx, "SELECT user_id, name, nip, password FROM users WHERE nip = $1", nip).Scan(&response.Id, &response.Name, &response.Nip, &response.Password)
 	if err != nil {
 		return
 	}

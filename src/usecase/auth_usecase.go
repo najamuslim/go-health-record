@@ -24,10 +24,10 @@ func NewAuthUsecase(
 	return &AuthUsecase{iUserRepository, helper}
 }
 
-func (u *AuthUsecase) Register(request dto.RequestCreateUser) (token string, err error) {
+func (u *AuthUsecase) Register(request dto.RequestCreateUser) (token string, userId string, err error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.MinCost)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	data := database.User{
@@ -48,7 +48,7 @@ func (u *AuthUsecase) Register(request dto.RequestCreateUser) (token string, err
 
 	token, _ = u.helper.GenerateToken(userData.Id)
 
-	return token, err
+	return token, userData.Id, err
 }
 
 func (u *AuthUsecase) Login(request dto.RequestAuth) (token string, user database.User, err error) {

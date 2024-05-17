@@ -20,7 +20,7 @@ func NewNurseUsecase(
 func (uc *NurseUsecase) RegisterNurse(request dto.RequestCreateNurse) (string, error) {
 	// Check if the nurse NIP already exists in the database
 	existingNurse, err := uc.iNurseRepository.GetNurseByNIP(context.TODO(), request.Nip)
-	if err == nil && existingNurse.Id != 0 {
+	if err == nil && existingNurse.Id != "" {
 			return "", errors.New("a nurse with this NIP already exists")
 	}
 

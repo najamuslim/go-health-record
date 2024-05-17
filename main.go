@@ -67,12 +67,15 @@ func main() {
 	middleware := middleware.NewMiddleware(helper)
 	// REPOSITORY
 	userRepository := repository.NewUserRepository(db)
+	nurseRepository := repository.NewNurseRepository(db)
 
 	// USECASE
 	authUsecase := usecase.NewAuthUsecase(userRepository, helper)
+	nurseUscase := usecase.NewNurseUsecase(nurseRepository)
 
 	// HANDLER
 	authHandler := handler.NewAuthHandler(authUsecase)
+	nurseHandler := handler.NewNurseHandler(nurseUscase)
 
 	// ROUTE
 	r.GET("/health", func(c *gin.Context) {
@@ -86,6 +89,8 @@ func main() {
 
 	authorized := r.Group("")
 	authorized.Use(middleware.AuthMiddleware)
+
+	authorized.POST("/v1/user/nurse/register", nurseHandler.RegisterNurse)
 
 	r.Run()
 }

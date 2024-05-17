@@ -44,7 +44,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	token, err := h.iAuthUsecase.Register(request)
+	token, userId, err := h.iAuthUsecase.Register(request)
 	if err != nil {
 		log.Println("Register bad request ", err)
 		c.JSON(500, gin.H{"status": "internal server error", "message": err})
@@ -52,10 +52,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	log.Println("Register successful")
-	c.JSON(200, gin.H{
+	c.JSON(201, gin.H{
     "message": "User registered successfully",
     "data": gin.H{
-			"email": request.Nip, 
+			"userId": userId,
+			"nip": request.Nip, 
 			"name": request.Name, 
       "accessToken": token,
 		},
@@ -106,7 +107,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 func ValidateRegisterRequest(nip int64, name, password string) error {
 	// Validate email format
 	if !isValidNip(nip) {
-		return errors.New("email must be in valid email format")
+		return errors.New("nip must be in valid email format")
 	}
 
 	// Validate name length
@@ -137,6 +138,7 @@ func ValidateLoginRequest(nip int64, password string) error {
 }
 
 // Helper function to validate email format
+// TODO fix to the correct nip validation
 func isValidNip(nip int64) bool {
 	// Regular expression pattern for email format
 	nipRegex := `^615[12][2-9][0-9]{3}(0[1-9]|1[0-2])[0-9]{3}$`

@@ -3,7 +3,7 @@ package database
 import "time"
 
 type Nurse struct {
-	Id			int
+	Id			string
 	Nip		string
 	Password	string
 	Name		string

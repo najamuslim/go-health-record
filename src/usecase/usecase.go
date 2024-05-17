@@ -7,7 +7,7 @@ import (
 )
 
 type AuthUsecaseInterface interface {
-	Register(request dto.RequestCreateUser) (token string, err error)
+	Register(request dto.RequestCreateUser) (token string, userId string, err error)
 	Login(request dto.RequestAuth) (token string, user database.User, err error)
 	GetUserByNIP(nip int64) (exists bool, err error)
 }
