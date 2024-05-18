@@ -7,6 +7,7 @@ import (
 type AuthHandlerInterface interface {
 	Register(c *gin.Context)
 	Login(c *gin.Context)
+	LoginNurse(c *gin.Context)
 }
 
 type NurseHandlerInterface interface {
@@ -14,4 +15,5 @@ type NurseHandlerInterface interface {
 	UpdateNurse(c *gin.Context)
 	DeleteNurse(c *gin.Context)
 	GetUsers(c *gin.Context)
+	AddAccess(c *gin.Context)
 }

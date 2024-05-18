@@ -186,6 +186,35 @@ func (h *NurseHandler) DeleteNurse(c *gin.Context) {
 	c.JSON(statusCode, gin.H{"status": statusCode})
 }
 
+func (h *NurseHandler) AddAccess(c *gin.Context) {
+	userId := c.Param("userId")
+	var request dto.RequestAddAccess
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		log.Println("add access bad request")
+		c.JSON(400, gin.H{"status": "bad request", "message": err})
+		return
+	}
+	// Validate request payload
+	err = validatePassword(request.Password)
+	if err != nil {
+		log.Println("Update bad request ", err)
+		c.JSON(400, gin.H{"status": "bad request", "message": err.Error()})
+		return
+	}
+	statusCode := h.iNurseUsecase.AddAccess(userId, request)
+
+	c.JSON(statusCode, gin.H{"status": statusCode})
+}
+
+func validatePassword(password string) error {
+	if len(password) < 5 || len(password) > 33 {
+		return errors.New("password length must be between 5 and 33 characters")
+	}
+
+	return nil
+}
+
 func ValidateRegisterNurseRequest(nip int64, name string) error {
 	// Validate email format
 	if !isValidNipNurse(nip) {
@@ -195,20 +224,6 @@ func ValidateRegisterNurseRequest(nip int64, name string) error {
 	// Validate name length
 	if len(name) < 5 || len(name) > 50 {
 		return errors.New("name length must be between 5 and 50 characters")
-	}
-
-	return nil
-}
-
-func ValidateLoginNurseRequest(nip int64, password string) error {
-	// Validate nip format
-	if !isValidNipNurse(nip) {
-		return errors.New("nip must be in valid nip format")
-	}
-
-	// Validate password length
-	if len(password) < 5 || len(password) > 15 {
-		return errors.New("password length must be between 5 and 15 characters")
 	}
 
 	return nil

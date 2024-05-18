@@ -70,6 +70,25 @@ func (u *AuthUsecase) Login(request dto.RequestAuth) (token string, user databas
 	return token, userData, nil
 }
 
+func (u *AuthUsecase) LoginNurse(request dto.RequestAuth) (token string, user database.User, err error) {
+	userData, err := u.iUserRepository.GetUserByNIP(context.TODO(), request.Nip)
+	if err != nil {
+		return "", database.User{}, errors.New("user not found")
+	}
+
+	fmt.Println(userData)
+
+	// check the password
+	isValid := u.verifyPassword(request.Password, userData.Password)
+	if !isValid {
+		return "", database.User{}, errors.New("wrong password")
+	}
+
+	token, _ = u.helper.GenerateToken(userData.Id)
+
+	return token, userData, nil
+}
+
 func (u *AuthUsecase) verifyPassword(password, passwordHash string) bool {
 	byteHash := []byte(passwordHash)
 	err := bcrypt.CompareHashAndPassword(byteHash, []byte(password))

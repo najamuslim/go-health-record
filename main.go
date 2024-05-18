@@ -86,6 +86,7 @@ func main() {
 
 	r.POST("/v1/user/it/register", authHandler.Register)
 	r.POST("/v1/user/it/login", authHandler.Login)
+	r.POST("/v1/user/nurse/login", authHandler.LoginNurse)
 
 	authorized := r.Group("")
 	authorized.Use(middleware.AuthMiddleware)
@@ -94,6 +95,7 @@ func main() {
 	authorized.GET("/v1/user", nurseHandler.GetUsers)
 	authorized.PUT("/v1/user/nurse/:userId", nurseHandler.UpdateNurse)
 	authorized.DELETE("/v1/user/nurse/:userId", nurseHandler.DeleteNurse)
+	authorized.PUT("/v1/user/nurse/:userId/access", nurseHandler.AddAccess)
 
 	r.Run()
 }

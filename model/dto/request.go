@@ -31,3 +31,7 @@ type RequestUpdateNurse struct {
 	Nip                int64  `json:"nip"`
 	Name               string `json:"name"`
 }
+
+type RequestAddAccess struct {
+  Password string `json:"password"`
+}

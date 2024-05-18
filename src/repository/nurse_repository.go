@@ -155,6 +155,36 @@ func (r *NurseRepository) DeleteNurse(ctx context.Context, userId string) int {
 	return 200
 }
 
+func (r *NurseRepository) AddAccess(ctx context.Context, userId string, nurse dto.RequestAddAccess) int {
+	const query = `UPDATE users SET password = $1 WHERE user_id = $2`
+
+	// Hash the generated password before storing it
+	hashedPassword, err := HashPassword(nurse.Password)
+	if err != nil {
+			return 500
+	}
+
+	result, err := r.db.ExecContext(ctx, query, hashedPassword, userId)
+	fmt.Println("result>>>>>>", result)
+	if err != nil {
+		fmt.Printf("failed to update nurse: %v", err)
+		return 500
+	}
+
+	// Check if any rows were affected
+	rowsAffected, err := result.RowsAffected()
+	fmt.Println("rowsAffected>>>>>>", rowsAffected)
+	if err != nil {
+		fmt.Printf("failed to get rows affected: %v", err)
+		return 404
+	}
+	if rowsAffected == 0 {
+		fmt.Printf("nurse with user_id %s not found", userId)
+		return 404
+	}
+	return 200
+}
+
 func GeneratePassword(length int) (string, error) {
 	bytes := make([]byte, length)
 	if _, err := rand.Read(bytes); err != nil {

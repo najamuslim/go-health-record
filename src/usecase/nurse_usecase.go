@@ -66,6 +66,10 @@ func (uc *NurseUsecase) DeleteNurse(userId string) int {
 	return uc.iNurseRepository.DeleteNurse(context.TODO(), userId)
 }
 
+func (uc *NurseUsecase) AddAccess(userId string, password dto.RequestAddAccess) int {
+  return uc.iNurseRepository.AddAccess(context.TODO(), userId, password)
+}
+
 func (u *NurseUsecase) GetNurseByNIP(nip int64) (bool, error) {
 	_, err := u.iNurseRepository.GetNurseByNIP(context.TODO(), nip)
 	if err != nil {

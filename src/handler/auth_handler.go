@@ -103,6 +103,47 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	})
 }
 
+func (h *AuthHandler) LoginNurse(c *gin.Context) {
+	var request dto.RequestAuth
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		log.Println("Login bad request ", err)
+		c.JSON(400, gin.H{"status": "bad request", "message": err})
+		return
+	}
+
+	err = ValidateLoginNurseRequest(request.Nip, request.Password)
+	if err != nil {
+		log.Println("Login bad request ", err)
+		c.JSON(400, gin.H{"status": "bad request", "message": err.Error()})
+		return
+	}
+
+	token, userData, err := h.iAuthUsecase.LoginNurse(request)
+	if err != nil {
+		log.Println("Login bad request ", err)
+		if err.Error() == "user not found" {
+			c.JSON(404, gin.H{"status": "bad request", "message": "user not found"})
+			return
+		} 
+		if err.Error() == "wrong password" {
+			c.JSON(400, gin.H{"status": "bad request", "message": "wrong password"})
+			return
+		}
+	}
+
+	log.Println("Login successful")
+	c.JSON(200, gin.H{
+    "message": "User logged successfully",
+    "data": gin.H{
+			"userId": userData.Id,
+			"nip": userData.Nip, 
+			"name": userData.Name, 
+      "accessToken": token,
+		},
+	})
+}
+
 // ValidateRegisterRequest validates the register user request payload
 func ValidateRegisterRequest(nip int64, name, password string) error {
 	// Validate email format
@@ -127,6 +168,20 @@ func ValidateLoginRequest(nip int64, password string) error {
 	// Validate email format
 	if !isValidNip(nip) {
 		return errors.New("nip must be in valid email format")
+	}
+
+	// Validate password length
+	if len(password) < 5 || len(password) > 15 {
+		return errors.New("password length must be between 5 and 15 characters")
+	}
+
+	return nil
+}
+
+func ValidateLoginNurseRequest(nip int64, password string) error {
+	// Validate email format
+	if !isValidNipNurse(nip) {
+		return errors.New("nip must be in valid nip format")
 	}
 
 	// Validate password length
