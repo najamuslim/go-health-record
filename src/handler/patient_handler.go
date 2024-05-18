@@ -24,31 +24,41 @@ func (h *PatientHandler) CreatePatient(c *gin.Context) {
 	var request dto.RequestCreatePatient
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		log.Println("Register bad request")
-		c.JSON(400, gin.H{"status": "bad request", "message": err})
+		log.Println("Register patient bad request >> ShouldBindJSON")
+		c.JSON(400, gin.H{"status": "bad request", "message": err.Error()})
 		return
 	}
 
 	err = ValidateRegisterPatientRequest(request)
 
 	if err != nil {
-		log.Println("Register bad request")
-		c.JSON(400, gin.H{"status": "bad request", "message": err})
+		log.Println("Register patient bad request >> ValidateRegisterPatientRequest")
+		c.JSON(400, gin.H{"status": "bad request", "message": err.Error()})
 		return
 	}
 
 	//error 409
-	h.iPatientUsecase.GetPatientByIdentityNumber (request)
+	exist, err := h.iPatientUsecase.GetPatientByIdentityNumber(request.IdentityNumber)
+	if(exist) {
+		log.Println("Register patient bad request >> GetPatientByIdentityNumber")
+		c.JSON(409, gin.H{"status": "bad request", "message": "IdentityNumber already registered"})
+		return
+	}
 
 	//create
 	err = h.iPatientUsecase.RegisterPatient(request)
-
 	
-
 	//error 500
+	if err != nil {
+		log.Println("Register patient error ", err)
+		c.JSON(500, gin.H{"status": "internal server error", "message": err.Error()})
+		return
+	}
 
 	//success 201
-
+	c.JSON(201, gin.H{
+		"message": "Medical patient successfully added",
+	})
 }
 
 func ValidateRegisterPatientRequest(request dto.RequestCreatePatient) error {
@@ -79,7 +89,7 @@ func ValidateRegisterPatientRequest(request dto.RequestCreatePatient) error {
 	return nil
 }
 
-func is16DigitInteger(num int64) bool {
+func is16DigitInteger(num int) bool {
     if num >= 1000000000000000 && num <= 9999999999999999 {
         return true
     }

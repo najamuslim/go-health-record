@@ -36,7 +36,7 @@ type RequestAddAccess struct {
   Password string `json:"password"`
 }
 type RequestCreatePatient struct {
-	IdentityNumber		int64	`json:"identityNumber"`
+	IdentityNumber		int	`json:"identityNumber"`
 	PhoneNumber			string	`json:"phoneNumber"`
 	Name				string	`json:"name"`
 	BirthDate			string	`json:"birthDate"`

@@ -4,8 +4,6 @@ import (
 	"context"
 	"health-record/model/database"
 	"health-record/model/dto"
-
-	"github.com/opencontainers/image-spec/identity"
 )
 
 type UserRepositoryInterface interface {

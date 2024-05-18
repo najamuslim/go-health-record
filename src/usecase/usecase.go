@@ -23,6 +23,7 @@ type NurseUsecaseInterface interface {
 }
 
 type PatientUsecaseInterface interface {
-	RegisterPatient(identityNumber int) (error)
+	RegisterPatient(dto.RequestCreatePatient) (error)
+	GetPatientByIdentityNumber(identityNumber int) (bool, error)
 }
 
