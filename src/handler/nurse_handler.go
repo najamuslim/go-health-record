@@ -141,6 +141,44 @@ func (h *NurseHandler) GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": users})
 }
 
+func (h *NurseHandler) UpdateNurse(c *gin.Context) {
+	userId := c.Param("userId")
+	var request dto.RequestUpdateNurse
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		log.Println("Update bad request")
+		c.JSON(400, gin.H{"status": "bad request", "message": err})
+		return
+	}
+
+	// Validate request payload
+	err = ValidateRegisterNurseRequest(request.Nip, request.Name)
+	if err != nil {
+		log.Println("Update bad request ", err)
+		c.JSON(400, gin.H{"status": "bad request", "message": err.Error()})
+		return
+	}
+
+	user, err := h.iNurseUsecase.GetNurseByID(userId)
+	if err != nil {
+		log.Println("Update bad request ", err)
+		c.JSON(404, gin.H{"status": "bad request", "message": "userId not found"})
+	}
+
+	if (user.Nip != request.Nip) {
+		exists, _ := h.iNurseUsecase.GetNurseByNIP(request.Nip)
+		if exists {
+			log.Println("Update bad request ", err)
+			c.JSON(409, gin.H{"status": "bad request", "message": "nip already exists"})
+			return
+		}
+	}
+	
+	statusCode := h.iNurseUsecase.UpdateNurse(userId, request)
+
+	c.JSON(statusCode, gin.H{"status": statusCode})
+}
+
 func (h *NurseHandler) DeleteNurse(c *gin.Context) {
 	userId := c.Param("userId")
 	statusCode := h.iNurseUsecase.DeleteNurse(userId)

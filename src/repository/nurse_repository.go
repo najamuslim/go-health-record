@@ -106,13 +106,27 @@ func (ur *NurseRepository) GetUsers(ctx context.Context, param dto.RequestGetUse
 
 
 // UpdateNurse updates an existing nurse's information in the database.
-func (repo *NurseRepository) UpdateNurse(ctx context.Context, userId string, nurse database.User) error {
-	const query = `UPDATE users SET nip = $1, name = $2, identity_card_scan_img = $3 WHERE id = $4`
-	_, err := repo.db.ExecContext(ctx, query, nurse.Nip, nurse.Name, nurse.IdentityCardScanImg, userId)
+func (repo *NurseRepository) UpdateNurse(ctx context.Context, userId string, nurse dto.RequestUpdateNurse) int {
+	const query = `UPDATE users SET nip = $1, name = $2 WHERE user_id = $3`
+	result, err := repo.db.ExecContext(ctx, query, nurse.Nip, nurse.Name, userId)
+	fmt.Println("result>>>>>>", result)
 	if err != nil {
-			return err
+		fmt.Printf("failed to update nurse: %v", err)
+		return 500
 	}
-	return nil
+
+	// Check if any rows were affected
+	rowsAffected, err := result.RowsAffected()
+	fmt.Println("rowsAffected>>>>>>", rowsAffected)
+	if err != nil {
+		fmt.Printf("failed to get rows affected: %v", err)
+		return 404
+	}
+	if rowsAffected == 0 {
+		fmt.Printf("nurse with user_id %s not found", userId)
+		return 404
+	}
+	return 200
 }
 
 // DeleteNurse removes a nurse from the database.
@@ -122,7 +136,7 @@ func (r *NurseRepository) DeleteNurse(ctx context.Context, userId string) int {
 	result, err := r.db.ExecContext(ctx, query, userId)
 	fmt.Println("result>>>>>>", result)
 	if err != nil {
-		fmt.Printf("failed to delete product: %v", err)
+		fmt.Printf("failed to delete nurse: %v", err)
 		return 500
 	}
 
@@ -162,15 +176,15 @@ func HashPassword(password string) (string, error) {
 func (r *NurseRepository) GetNurseByNIP(ctx context.Context, nip int64) (response database.User, err error) {
 	err = r.db.QueryRowContext(ctx, "SELECT user_id, name, nip, password FROM users WHERE nip = $1", nip).Scan(&response.Id, &response.Name, &response.Nip, &response.Password)
 	if err != nil {
-		return
+		return database.User{}, err
 	}
-	return
+	return response, nil
 }
 
 func (r *NurseRepository) GetNurseByID(ctx context.Context, userId string) (response database.User, err error) {
-	err = r.db.QueryRowContext(ctx, "SELECT id, name, nip, password FROM users WHERE id = $1", userId).Scan(&response.Id, &response.Name, &response.Nip, &response.Password)
+	err = r.db.QueryRowContext(ctx, "SELECT user_id, name, nip, password FROM users WHERE user_id = $1", userId).Scan(&response.Id, &response.Name, &response.Nip, &response.Password)
 	if err != nil {
-		return
+		return database.User{}, err
 	}
-	return
+	return response, nil
 }

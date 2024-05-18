@@ -50,15 +50,15 @@ func (uc *NurseUsecase) GetUsers(request dto.RequestGetUser) ([]dto.UserDTO, err
 }
 
 // UpdateNurse handles the updating of an existing nurse's information.
-func (uc *NurseUsecase) UpdateNurse(ctx context.Context, userId string, nurse database.User) error {
+func (uc *NurseUsecase) UpdateNurse(userId string, nurse dto.RequestUpdateNurse) int {
 	// Ensure the nurse exists before attempting to update
-	_, err := uc.iNurseRepository.GetNurseByID(ctx, userId)
+	_, err := uc.iNurseRepository.GetNurseByID(context.TODO(), userId)
 	if err != nil {
-			return errors.New("nurse not found")
+			return 404
 	}
 
 	// Proceed with updating the nurse
-	return uc.iNurseRepository.UpdateNurse(ctx, userId, nurse)
+	return uc.iNurseRepository.UpdateNurse(context.TODO(), userId, nurse)
 }
 
 // DeleteNurse handles the deletion of a nurse.
@@ -74,12 +74,12 @@ func (u *NurseUsecase) GetNurseByNIP(nip int64) (bool, error) {
 	return true, nil
 }
 
-func (u *NurseUsecase) GetNurseByID(id string) (bool, error) {
-	_, err := u.iNurseRepository.GetNurseByID(context.TODO(), id)
+func (u *NurseUsecase) GetNurseByID(id string) (database.User, error) {
+	user, err := u.iNurseRepository.GetNurseByID(context.TODO(), id)
   if err != nil {
-    return false, err
+    return database.User{}, err
   }
-  return true, nil
+  return user, nil
 }
 
 func validateLimit(limit int) int {

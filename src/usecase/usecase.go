@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"context"
 	"health-record/model/database"
 	"health-record/model/dto"
 )
@@ -15,8 +14,8 @@ type AuthUsecaseInterface interface {
 type NurseUsecaseInterface interface {
 	RegisterNurse(request dto.RequestCreateNurse) (string, error)
 	GetUsers(request dto.RequestGetUser) ([]dto.UserDTO, error)
-	UpdateNurse(ctx context.Context, userId string, nurse database.User) error
+	UpdateNurse(userId string, nurse dto.RequestUpdateNurse) int
 	DeleteNurse(userId string) int
-	GetNurseByID(userId string) (bool, error)
+	GetNurseByID(userId string) (database.User, error)
 	GetNurseByNIP(nip int64) (bool, error)
 }

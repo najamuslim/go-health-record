@@ -26,3 +26,8 @@ type RequestGetUser struct {
 	Role    string `form:"category"`
 	CreatedAt   string `form:"createdAt"`
 }
+
+type RequestUpdateNurse struct {
+	Nip                int64  `json:"nip"`
+	Name               string `json:"name"`
+}
