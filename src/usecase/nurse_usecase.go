@@ -32,8 +32,25 @@ func (uc *NurseUsecase) RegisterNurse(request dto.RequestCreateNurse) (string, e
 	return userId, nil
 }
 
+func (uc *NurseUsecase) GetUsers(request dto.RequestGetUser) ([]dto.UserDTO, error) {
+	params := dto.RequestGetUser{
+		Limit:    validateLimit(request.Limit),
+		Offset:   validateOffset(request.Offset),
+		UserId: request.UserId,
+		Name:     request.Name,
+    NIP:      request.NIP,
+    Role: request.Role,
+		CreatedAt: request.CreatedAt,
+	}
+
+	response, err := uc.iNurseRepository.GetUsers(context.TODO(), params)
+	
+	
+	return response, err
+}
+
 // UpdateNurse handles the updating of an existing nurse's information.
-func (uc *NurseUsecase) UpdateNurse(ctx context.Context, userId string, nurse database.Nurse) error {
+func (uc *NurseUsecase) UpdateNurse(ctx context.Context, userId string, nurse database.User) error {
 	// Ensure the nurse exists before attempting to update
 	_, err := uc.iNurseRepository.GetNurseByID(ctx, userId)
 	if err != nil {
@@ -45,13 +62,8 @@ func (uc *NurseUsecase) UpdateNurse(ctx context.Context, userId string, nurse da
 }
 
 // DeleteNurse handles the deletion of a nurse.
-func (uc *NurseUsecase) DeleteNurse(ctx context.Context, userId string) error {
-	return uc.iNurseRepository.DeleteNurse(ctx, userId)
-}
-
-// GetNurses retrieves nurses based on optional filters.
-func (uc *NurseUsecase) GetNurses(ctx context.Context, filters map[string]interface{}) ([]database.Nurse, error) {
-	return uc.iNurseRepository.GetNurses(ctx, filters)
+func (uc *NurseUsecase) DeleteNurse(userId string) int {
+	return uc.iNurseRepository.DeleteNurse(context.TODO(), userId)
 }
 
 func (u *NurseUsecase) GetNurseByNIP(nip int64) (bool, error) {
@@ -68,4 +80,18 @@ func (u *NurseUsecase) GetNurseByID(id string) (bool, error) {
     return false, err
   }
   return true, nil
+}
+
+func validateLimit(limit int) int {
+	if limit >= 0 {
+			return limit
+	}
+return 5
+}
+
+func validateOffset(offset int) int {
+	if offset >= 0 {
+			return offset
+	}
+return 0
 }

@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
+	"fmt"
 	"health-record/model/database"
 	"health-record/model/dto"
 	"strconv"
@@ -49,10 +50,64 @@ func (repo *NurseRepository) CreateNurse(ctx context.Context, nurse dto.RequestC
 	return userId, nil
 }
 
+func (ur *NurseRepository) GetUsers(ctx context.Context, param dto.RequestGetUser) ([]dto.UserDTO, error) {
+	query := "SELECT user_id, nip, name, created_at FROM users WHERE 1=1"
+
+	var args []interface{}
+
+	if param.UserId != "" {
+		query += " AND user_id LIKE $" + strconv.Itoa(len(args)+1)
+		args = append(args, "%"+param.UserId+"%")
+	}
+
+	if param.Name != "" {
+		query += " AND name LIKE $" + strconv.Itoa(len(args)+1)
+		args = append(args, "%"+param.Name+"%")
+	}
+
+	if param.NIP != "" {
+		query += " AND CAST(nip AS TEXT) LIKE $" + strconv.Itoa(len(args)+1)
+		args = append(args, param.NIP+"%")
+	}
+
+	if param.Role == "it" || param.Role == "nurse"{
+		query += " AND role=$" + strconv.Itoa(len(args)+1)
+		args = append(args, param.Role)
+	}
+
+	if param.CreatedAt == "asc" || param.CreatedAt == "desc" {
+		query += fmt.Sprintf(" ORDER BY created_at %s", param.CreatedAt)
+	}
+
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d", param.Limit, param.Offset)
+
+	rows, err := ur.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []dto.UserDTO
+	for rows.Next() {
+		var user dto.UserDTO
+		if err := rows.Scan(&user.UserId, &user.NIP, &user.Name, &user.CreatedAt); err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 
 // UpdateNurse updates an existing nurse's information in the database.
-func (repo *NurseRepository) UpdateNurse(ctx context.Context, userId string, nurse database.Nurse) error {
-	const query = `UPDATE nurses SET nip = $1, name = $2, identity_card_scan_img = $3 WHERE id = $4`
+func (repo *NurseRepository) UpdateNurse(ctx context.Context, userId string, nurse database.User) error {
+	const query = `UPDATE users SET nip = $1, name = $2, identity_card_scan_img = $3 WHERE id = $4`
 	_, err := repo.db.ExecContext(ctx, query, nurse.Nip, nurse.Name, nurse.IdentityCardScanImg, userId)
 	if err != nil {
 			return err
@@ -61,38 +116,29 @@ func (repo *NurseRepository) UpdateNurse(ctx context.Context, userId string, nur
 }
 
 // DeleteNurse removes a nurse from the database.
-func (repo *NurseRepository) DeleteNurse(ctx context.Context, userId string) error {
-	const query = `DELETE FROM nurses WHERE id = $1`
-	_, err := repo.db.ExecContext(ctx, query, userId)
+func (r *NurseRepository) DeleteNurse(ctx context.Context, userId string) int {
+	const query = `DELETE FROM users WHERE user_id = $1`
+	// Execute the SQL query
+	result, err := r.db.ExecContext(ctx, query, userId)
+	fmt.Println("result>>>>>>", result)
 	if err != nil {
-			return err
-	}
-	return nil
-}
-
-// GetUsers retrieves nurses from the database based on various filters.
-func (repo *NurseRepository) GetNurses(ctx context.Context, filters map[string]interface{}) ([]database.Nurse, error) {
-	var users []database.Nurse
-	// This is a simplified query that should be adjusted to handle filters correctly.
-	query := `SELECT id, nip, name, identity_card_scan_img FROM nurses`
-	rows, err := repo.db.QueryContext(ctx, query)
-	if err != nil {
-			return nil, err
-	}
-	defer rows.Close()
-	
-	for rows.Next() {
-			var user database.Nurse
-			if err := rows.Scan(&user.Id, &user.Nip, &user.Name, &user.IdentityCardScanImg); err != nil {
-					return nil, err
-			}
-			users = append(users, user)
+		fmt.Printf("failed to delete product: %v", err)
+		return 500
 	}
 
-	if err := rows.Err(); err != nil {
-			return nil, err
+	// Check if any rows were affected
+	rowsAffected, err := result.RowsAffected()
+	fmt.Println("rowsAffected>>>>>>", rowsAffected)
+	if err != nil {
+		fmt.Printf("failed to get rows affected: %v", err)
+		return 404
 	}
-	return users, nil
+	if rowsAffected == 0 {
+		fmt.Printf("nurse with user_id %s not found", userId)
+		return 404
+	}
+
+	return 200
 }
 
 func GeneratePassword(length int) (string, error) {
@@ -113,7 +159,7 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-func (r *NurseRepository) GetNurseByNIP(ctx context.Context, nip int64) (response database.Nurse, err error) {
+func (r *NurseRepository) GetNurseByNIP(ctx context.Context, nip int64) (response database.User, err error) {
 	err = r.db.QueryRowContext(ctx, "SELECT user_id, name, nip, password FROM users WHERE nip = $1", nip).Scan(&response.Id, &response.Name, &response.Nip, &response.Password)
 	if err != nil {
 		return
@@ -121,7 +167,7 @@ func (r *NurseRepository) GetNurseByNIP(ctx context.Context, nip int64) (respons
 	return
 }
 
-func (r *NurseRepository) GetNurseByID(ctx context.Context, userId string) (response database.Nurse, err error) {
+func (r *NurseRepository) GetNurseByID(ctx context.Context, userId string) (response database.User, err error) {
 	err = r.db.QueryRowContext(ctx, "SELECT id, name, nip, password FROM users WHERE id = $1", userId).Scan(&response.Id, &response.Name, &response.Nip, &response.Password)
 	if err != nil {
 		return

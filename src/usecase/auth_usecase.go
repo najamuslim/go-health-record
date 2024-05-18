@@ -35,7 +35,6 @@ func (u *AuthUsecase) Register(request dto.RequestCreateUser) (token string, use
 		Password:  string(hash),
 		Name:      request.Name,
 		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
 	}
 
 	u.iUserRepository.CreateUser(context.TODO(), data)

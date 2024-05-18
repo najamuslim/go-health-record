@@ -7,6 +7,7 @@ type User struct {
 	Nip		int64
 	Password	string
 	Name		string
+	Role string
+	IdentityCardScanImg string
 	CreatedAt 	time.Time
-	UpdatedAt 	time.Time
 }

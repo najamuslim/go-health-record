@@ -12,6 +12,6 @@ type AuthHandlerInterface interface {
 type NurseHandlerInterface interface {
   RegisterNurse(c *gin.Context)
 	// UpdateNurse(c *gin.Context)
-	// DeleteNurse(c *gin.Context)
-	// GetNurses(c *gin.Context)
+	DeleteNurse(c *gin.Context)
+	GetUsers(c *gin.Context)
 }

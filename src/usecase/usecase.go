@@ -14,9 +14,9 @@ type AuthUsecaseInterface interface {
 
 type NurseUsecaseInterface interface {
 	RegisterNurse(request dto.RequestCreateNurse) (string, error)
-	UpdateNurse(ctx context.Context, userId string, nurse database.Nurse) error
-	DeleteNurse(ctx context.Context, userId string) error
-	GetNurses(ctx context.Context, filters map[string]interface{}) ([]database.Nurse, error)
+	GetUsers(request dto.RequestGetUser) ([]dto.UserDTO, error)
+	UpdateNurse(ctx context.Context, userId string, nurse database.User) error
+	DeleteNurse(userId string) int
 	GetNurseByID(userId string) (bool, error)
 	GetNurseByNIP(nip int64) (bool, error)
 }

@@ -91,6 +91,9 @@ func main() {
 	authorized.Use(middleware.AuthMiddleware)
 
 	authorized.POST("/v1/user/nurse/register", nurseHandler.RegisterNurse)
+	authorized.GET("/v1/user", nurseHandler.GetUsers)
+	// authorized.PUT("/v1/user/nurse/:userId", nurseHandler.RegisterNurse)
+	authorized.DELETE("/v1/user/nurse/:userId", nurseHandler.DeleteNurse)
 
 	r.Run()
 }

@@ -2,9 +2,14 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"health-record/model/dto"
 	"health-record/src/usecase"
 	"log"
+	"net/http"
+	"regexp"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -60,10 +65,93 @@ func (h *NurseHandler) RegisterNurse(c *gin.Context) {
 	})
 }
 
+func (h *NurseHandler) GetUsers(c *gin.Context) {
+	var userId, nip, name, role string
+	
+	if _, ok := c.Request.URL.Query()["userId"]; ok{
+		userId = c.Query("userId")
+	}
+
+	if _, ok := c.Request.URL.Query()["nip"]; ok{
+		nip = c.Query("nip")
+	}
+
+	if _, ok := c.Request.URL.Query()["name"]; ok{
+		name = c.Query("name")
+	}
+
+	if _, ok := c.Request.URL.Query()["role"]; ok{
+		role = c.Query("role")
+	}
+
+	var limit, offset int
+	if _, ok := c.Request.URL.Query()["limit"]; ok && c.Query("limit") != "" {
+		val, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+				limit = 5
+		} else {
+			limit = val
+		}
+	} else {
+		limit = 5
+	}
+
+	if _, ok := c.Request.URL.Query()["offset"]; ok && c.Query("offset") != "" {
+		val, err := strconv.Atoi(c.Query("offset"))
+		if err != nil {
+				offset = 0
+		} else {
+			offset = val
+		}
+	}
+
+	var createdAt  string
+	
+	if _, ok := c.Request.URL.Query()["createdAt"]; ok && c.Query("createdAt") != "" {
+		createdAt  = c.Query("createdAt")
+	}
+
+	params := dto.RequestGetUser{
+		UserId	: userId,
+		Limit	: limit,
+		Offset	: offset,
+		Name: name,
+		NIP: nip,
+		Role: role,
+		CreatedAt	: createdAt,
+	}
+
+	fmt.Println("paramsCustomerId>>>>>", params.UserId)
+	fmt.Println("paramsCustomerId>>>>>", params.NIP)
+	fmt.Println("paramsCustomerId>>>>>", params.Role)
+	fmt.Println("paramsCustomerId>>>>>", params.Name)
+	fmt.Println("paramsLimit>>>>>", params.Limit)
+	fmt.Println("paramsOffset>>>>>", params.Offset)
+	fmt.Println("paramsCreatedAt>>>>>", params.CreatedAt)
+
+	users, err := h.iNurseUsecase.GetUsers(params)
+
+	if err != nil {
+		log.Println("get sku server error ", err)
+		c.JSON(500, gin.H{"status": "internal server error", "message": err})
+		return
+	}
+
+	if(len(users) < 1) { users = []dto.UserDTO{}}
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": users})
+}
+
+func (h *NurseHandler) DeleteNurse(c *gin.Context) {
+	userId := c.Param("userId")
+	statusCode := h.iNurseUsecase.DeleteNurse(userId)
+
+	c.JSON(statusCode, gin.H{"status": statusCode})
+}
+
 func ValidateRegisterNurseRequest(nip int64, name string) error {
 	// Validate email format
-	if !isValidNip(nip) {
-		return errors.New("nip must be in valid email format")
+	if !isValidNipNurse(nip) {
+		return errors.New("nip must be in valid nip format")
 	}
 
 	// Validate name length
@@ -75,9 +163,9 @@ func ValidateRegisterNurseRequest(nip int64, name string) error {
 }
 
 func ValidateLoginNurseRequest(nip int64, password string) error {
-	// Validate email format
-	if !isValidNip(nip) {
-		return errors.New("email must be in valid email format")
+	// Validate nip format
+	if !isValidNipNurse(nip) {
+		return errors.New("nip must be in valid nip format")
 	}
 
 	// Validate password length
@@ -86,4 +174,14 @@ func ValidateLoginNurseRequest(nip int64, password string) error {
 	}
 
 	return nil
+}
+
+func isValidNipNurse(nip int64) bool {
+	currentYear := time.Now().Year()
+	nipRegex := fmt.Sprintf(`^303[12](200[0-%d]|20[01][0-9]|202[0-%d])(0[1-9]|1[0-2])[0-9]{3}$`, currentYear%10, currentYear%10)
+	// Convert the nip int64 to a string
+	nipStr := strconv.FormatInt(nip, 10)
+	// Match the string with the regex
+	match, _ := regexp.MatchString(nipRegex, nipStr)
+	return match
 }
