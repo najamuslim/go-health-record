@@ -21,3 +21,8 @@ type NurseUsecaseInterface interface {
 	GetNurseByID(userId string) (database.User, error)
 	GetNurseByNIP(nip int64) (bool, error)
 }
+
+type PatientUsecaseInterface interface {
+	RegisterPatient(identityNumber int) (error)
+}
+

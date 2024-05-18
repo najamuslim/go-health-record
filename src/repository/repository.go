@@ -4,6 +4,8 @@ import (
 	"context"
 	"health-record/model/database"
 	"health-record/model/dto"
+
+	"github.com/opencontainers/image-spec/identity"
 )
 
 type UserRepositoryInterface interface {
@@ -19,4 +21,9 @@ type NurseRepositoryInterface interface {
 	AddAccess(ctx context.Context, userId string, password dto.RequestAddAccess) int
 	GetNurseByNIP(ctx context.Context, nip int64) (response database.User, err error)
 	GetNurseByID(ctx context.Context, userId string) (response database.User, err error)
+}
+
+type PatientRepositoryInterface interface {
+	CreatePatient(ctx context.Context, request dto.RequestCreatePatient) (err error)
+	GetPatientByIdentityNumber(ctx context.Context, identityNumber int) (database.Patient, error)
 }

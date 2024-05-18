@@ -7,6 +7,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/joho/godotenv v1.5.1
+	github.com/relvacode/iso8601 v1.4.0
 )
 
 require (

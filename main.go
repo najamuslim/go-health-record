@@ -65,17 +65,21 @@ func main() {
 
 	// MIDDLEWARE
 	middleware := middleware.NewMiddleware(helper)
+
 	// REPOSITORY
 	userRepository := repository.NewUserRepository(db)
 	nurseRepository := repository.NewNurseRepository(db)
+	patientRepository := repository.NewPatientRepository(db)
 
 	// USECASE
 	authUsecase := usecase.NewAuthUsecase(userRepository, helper)
 	nurseUscase := usecase.NewNurseUsecase(nurseRepository)
+	patientUsecase := usecase.NewPatientUsecase(patientRepository)
 
 	// HANDLER
 	authHandler := handler.NewAuthHandler(authUsecase)
 	nurseHandler := handler.NewNurseHandler(nurseUscase)
+	patientHandler := handler.NewPatientHandler(patientUsecase)
 
 	// ROUTE
 	r.GET("/health", func(c *gin.Context) {
@@ -99,6 +103,7 @@ func main() {
 	itAuthorized.PUT("/v1/user/nurse/:userId", nurseHandler.UpdateNurse)
 	itAuthorized.DELETE("/v1/user/nurse/:userId", nurseHandler.DeleteNurse)
 	itAuthorized.PUT("/v1/user/nurse/:userId/access", nurseHandler.AddAccess)
+	r.POST("/v1/medical/patient", patientHandler.CreatePatient)
 
 	r.Run()
 }
