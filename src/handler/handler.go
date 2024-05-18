@@ -16,12 +16,9 @@ type NurseHandlerInterface interface {
 	DeleteNurse(c *gin.Context)
 	GetUsers(c *gin.Context)
 	AddAccess(c *gin.Context)
-	// UpdateNurse(c *gin.Context)
-	// DeleteNurse(c *gin.Context)
-	// GetNurses(c *gin.Context)
 }
 
 type PatientHandlerInterface interface {
   CreatePatient(c *gin.Context)
-//   GetPatient(c *gin.Context)
+  GetPatients(c *gin.Context)  
 }

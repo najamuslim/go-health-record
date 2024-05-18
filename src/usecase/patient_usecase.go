@@ -7,7 +7,7 @@ import (
 )
 
 type PatientUsecase struct {
-	iPatientRepository repository.PatientRepositoryInterface
+	iPatientRepository repository.PatientRepositoryInterface	
 }
 
 func NewPatientUsecase(
@@ -29,3 +29,20 @@ func (u *PatientUsecase) GetPatientByIdentityNumber(identityNumber int) (bool, e
   }
 	return true, nil
 }
+
+func (uc *PatientUsecase) GetPatients(request dto.RequestGetPatients) ([]dto.PatientDTO, error) {
+	params := dto.RequestGetPatients{
+		Limit:    request.Limit,
+		Offset:   request.Offset,
+		IdentityNumber: request.IdentityNumber,
+		Name:     request.Name,
+		PhoneNumber: request.PhoneNumber,
+		CreatedAt: request.CreatedAt,
+	}
+
+	response, err := uc.iPatientRepository.GetPatients(context.TODO(), params)
+	
+	
+	return response, err
+}
+

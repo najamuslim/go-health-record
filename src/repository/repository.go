@@ -24,4 +24,5 @@ type NurseRepositoryInterface interface {
 type PatientRepositoryInterface interface {
 	CreatePatient(ctx context.Context, request dto.RequestCreatePatient) (err error)
 	GetPatientByIdentityNumber(ctx context.Context, identityNumber int) (database.Patient, error)
+	GetPatients(ctx context.Context, params dto.RequestGetPatients) ([]dto.PatientDTO, error)
 }

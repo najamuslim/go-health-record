@@ -5,7 +5,9 @@ import (
 	"health-record/model/dto"
 	"health-record/src/usecase"
 	"log"
+	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -38,7 +40,7 @@ func (h *PatientHandler) CreatePatient(c *gin.Context) {
 	}
 
 	//error 409
-	exist, err := h.iPatientUsecase.GetPatientByIdentityNumber(request.IdentityNumber)
+	exist, _ := h.iPatientUsecase.GetPatientByIdentityNumber(request.IdentityNumber)
 	if(exist) {
 		log.Println("Register patient bad request >> GetPatientByIdentityNumber")
 		c.JSON(409, gin.H{"status": "bad request", "message": "IdentityNumber already registered"})
@@ -59,6 +61,66 @@ func (h *PatientHandler) CreatePatient(c *gin.Context) {
 	c.JSON(201, gin.H{
 		"message": "Medical patient successfully added",
 	})
+}
+
+func (h *PatientHandler) GetPatients(c *gin.Context) {
+	query := c.Request.URL.Query()
+	params := parseQueryParams(query)
+
+	patients, err := h.iPatientUsecase.GetPatients(params)
+
+	
+	if err != nil {
+		log.Println("get patients server error ", err)
+		c.JSON(500, gin.H{"status": "internal server error", "message": err})
+		return
+	}
+	
+	if len(patients) < 1 {patients = []dto.PatientDTO{}}
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": patients})
+
+}
+
+
+func parseQueryParams(query url.Values) dto.RequestGetPatients {
+	params := dto.RequestGetPatients{
+		Limit:  5,
+		Offset: 0,
+	}
+
+	if identityNumber := query.Get("identityNumber"); identityNumber != "" {
+		if id, err := strconv.Atoi(identityNumber); err == nil {
+			params.IdentityNumber = &id
+		}
+	}
+
+	if limit := query.Get("limit"); limit != "" {
+		if l, err := strconv.Atoi(limit); err == nil {
+			params.Limit = l
+		}
+	}
+
+	if offset := query.Get("offset"); offset != "" {
+		if o, err := strconv.Atoi(offset); err == nil {
+			params.Offset = o
+		}
+	}
+
+	if name := query.Get("name"); name != "" {
+		params.Name = &name
+	}
+
+	if phoneNumber := query.Get("phoneNumber"); phoneNumber != "" {
+		if phoneNumber, err := strconv.Atoi(phoneNumber); err == nil {
+			params.PhoneNumber = &phoneNumber
+		}
+	}
+
+	if createdAt := query.Get("createdAt"); createdAt == "asc" || createdAt == "desc" {
+		params.CreatedAt = createdAt
+	}
+
+	return params
 }
 
 func ValidateRegisterPatientRequest(request dto.RequestCreatePatient) error {

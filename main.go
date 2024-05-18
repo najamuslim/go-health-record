@@ -107,6 +107,7 @@ func main() {
 	
 	
 	authorized.POST("/v1/medical/patient", patientHandler.CreatePatient)
+	authorized.GET("/v1/medical/patient", patientHandler.GetPatients)
 
 	r.Run()
 }

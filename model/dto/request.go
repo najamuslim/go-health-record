@@ -43,3 +43,12 @@ type RequestCreatePatient struct {
 	Gender				string	`json:"gender"`
 	IdentityCardScanImg	string	`json:"identityCardScanImg"`
 }
+
+type RequestGetPatients struct {
+	IdentityNumber *int
+	Limit          int
+	Offset         int
+	Name           *string
+	PhoneNumber    *int
+	CreatedAt      string
+}
