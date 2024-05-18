@@ -1,10 +1,8 @@
 package middleware
 
 import (
-	"fmt"
 	"health-record/helpers"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +14,7 @@ type Middleware struct {
 
 type MiddlewareInterface interface {
 	AuthMiddleware(c *gin.Context)
+	RoleMiddleware(role string) gin.HandlerFunc
 }
 
 func NewMiddleware(helper helpers.HelperInterface) MiddlewareInterface {
@@ -46,12 +45,20 @@ func (m *Middleware) AuthMiddleware(c *gin.Context) {
 		return
 	}
 
-	num, err := strconv.Atoi(claims.Subject)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-
-	c.Set("user_id", num)
+	c.Set("user_id", claims["sub"])
+	c.Set("user_role", claims["role"])
 	c.Next()
+}
+
+func (m *Middleware) RoleMiddleware(requiredRole string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role, exists := c.Get("user_role")
+		
+		if !exists || role != requiredRole {
+			c.JSON(http.StatusBadRequest, "you don't have permission to access this resource")
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
 }

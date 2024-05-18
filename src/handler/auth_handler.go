@@ -7,6 +7,7 @@ import (
 	"log"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -72,6 +73,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	nStr := strconv.FormatInt(request.Nip, 10)
+	if !strings.HasPrefix(nStr, "615") {
+		c.JSON(404, gin.H{"status": "bad request", "message": "user not found"})
+			return
+	}
+
 	err = ValidateLoginRequest(request.Nip, request.Password)
 	if err != nil {
 		log.Println("Login bad request ", err)
@@ -110,6 +117,12 @@ func (h *AuthHandler) LoginNurse(c *gin.Context) {
 		log.Println("Login bad request ", err)
 		c.JSON(400, gin.H{"status": "bad request", "message": err})
 		return
+	}
+
+	nStr := strconv.FormatInt(request.Nip, 10)
+	if !strings.HasPrefix(nStr, "303") {
+		c.JSON(404, gin.H{"status": "bad request", "message": "user not found"})
+			return
 	}
 
 	err = ValidateLoginNurseRequest(request.Nip, request.Password)
@@ -165,9 +178,10 @@ func ValidateRegisterRequest(nip int64, name, password string) error {
 }
 
 func ValidateLoginRequest(nip int64, password string) error {
-	// Validate email format
+	// Validate nip format
+
 	if !isValidNip(nip) {
-		return errors.New("nip must be in valid email format")
+		return errors.New("nip must be in valid nip format")
 	}
 
 	// Validate password length

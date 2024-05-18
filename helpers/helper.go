@@ -1,6 +1,8 @@
 package helpers
 
+import "github.com/golang-jwt/jwt"
+
 type HelperInterface interface {
-	GenerateToken(userId string) (string, error)
-	ValidateJWT(tokenString string) (*Claims, error)
+	GenerateToken(userId, role string) (string, error)
+	ValidateJWT(tokenString string) (jwt.MapClaims, error)
 }

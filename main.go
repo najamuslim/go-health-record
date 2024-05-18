@@ -91,11 +91,14 @@ func main() {
 	authorized := r.Group("")
 	authorized.Use(middleware.AuthMiddleware)
 
-	authorized.POST("/v1/user/nurse/register", nurseHandler.RegisterNurse)
-	authorized.GET("/v1/user", nurseHandler.GetUsers)
-	authorized.PUT("/v1/user/nurse/:userId", nurseHandler.UpdateNurse)
-	authorized.DELETE("/v1/user/nurse/:userId", nurseHandler.DeleteNurse)
-	authorized.PUT("/v1/user/nurse/:userId/access", nurseHandler.AddAccess)
+	// IT user only
+	itAuthorized := authorized.Group("")
+	itAuthorized.Use(middleware.RoleMiddleware("it"))
+	itAuthorized.POST("/v1/user/nurse/register", nurseHandler.RegisterNurse)
+	itAuthorized.GET("/v1/user", nurseHandler.GetUsers)
+	itAuthorized.PUT("/v1/user/nurse/:userId", nurseHandler.UpdateNurse)
+	itAuthorized.DELETE("/v1/user/nurse/:userId", nurseHandler.DeleteNurse)
+	itAuthorized.PUT("/v1/user/nurse/:userId/access", nurseHandler.AddAccess)
 
 	r.Run()
 }

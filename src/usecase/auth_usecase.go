@@ -45,7 +45,7 @@ func (u *AuthUsecase) Register(request dto.RequestCreateUser) (token string, use
 
 	fmt.Println(userData)
 
-	token, _ = u.helper.GenerateToken(userData.Id)
+	token, _ = u.helper.GenerateToken(userData.Id, userData.Role)
 
 	return token, userData.Id, err
 }
@@ -65,7 +65,7 @@ func (u *AuthUsecase) Login(request dto.RequestAuth) (token string, user databas
 		return "", database.User{}, errors.New("wrong password")
 	}
 
-	token, _ = u.helper.GenerateToken(userData.Id)
+	token, _ = u.helper.GenerateToken(userData.Id, userData.Role)
 
 	return token, userData, nil
 }
@@ -84,7 +84,7 @@ func (u *AuthUsecase) LoginNurse(request dto.RequestAuth) (token string, user da
 		return "", database.User{}, errors.New("wrong password")
 	}
 
-	token, _ = u.helper.GenerateToken(userData.Id)
+	token, _ = u.helper.GenerateToken(userData.Id, userData.Role)
 
 	return token, userData, nil
 }

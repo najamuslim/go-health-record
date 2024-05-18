@@ -19,7 +19,7 @@ func NewUserRepository(db *sql.DB) UserRepositoryInterface {
 }
 
 func (r *UserRepository) GetUserByNIP(ctx context.Context, nip int64) (response database.User, err error) {
-	err = r.db.QueryRowContext(ctx, "SELECT user_id, name, nip, password FROM users WHERE nip = $1", nip).Scan(&response.Id, &response.Name, &response.Nip, &response.Password)
+	err = r.db.QueryRowContext(ctx, "SELECT user_id, name, nip, password, role FROM users WHERE nip = $1", nip).Scan(&response.Id, &response.Name, &response.Nip, &response.Password, &response.Role)
 	if err != nil {
 		return
 	}
