@@ -105,13 +105,8 @@ func (h *PatientHandler) CreateRecord(c *gin.Context) {
 	}
 
 	//error 404
-	filter := dto.RequestGetRecord{
-		IdentityDetail: dto.IdentityDetail{
-			IdentityNumber: request.IdentityNumber,
-		},
-	}
-	exist, _ := h.iPatientUsecase.GetRecords(filter)
-	if len(exist) == 0 || err != nil {
+	exist, _ := h.iPatientUsecase.GetPatientByIdentityNumber(request.IdentityNumber)
+	if (!exist) {
 		log.Println("Create request is not exist >> GetRecords")
 		c.JSON(404, gin.H{"status": "not exist", "message": "IdentityNumber not exist"})
 		return
