@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -156,18 +157,24 @@ func (h *NurseHandler) UpdateNurse(c *gin.Context) {
 		return
 	}
 
+	user, err := h.iNurseUsecase.GetNurseByID(userId)
+	if err != nil {
+		log.Println("Update bad request ", err)
+		c.JSON(404, gin.H{"status": "bad request", "message": "userId not found"})
+	}
+
+	nStr := strconv.FormatInt(user.Nip, 10)
+	if !strings.HasPrefix(nStr, "303") {
+		c.JSON(404, gin.H{"status": "bad request", "message": "user not found"})
+			return
+	}
+
 	// Validate request payload
 	err = ValidateRegisterNurseRequest(request.Nip, request.Name)
 	if err != nil {
 		log.Println("Update bad request ", err)
 		c.JSON(400, gin.H{"status": "bad request", "message": err.Error()})
 		return
-	}
-
-	user, err := h.iNurseUsecase.GetNurseByID(userId)
-	if err != nil {
-		log.Println("Update bad request ", err)
-		c.JSON(404, gin.H{"status": "bad request", "message": "userId not found"})
 	}
 
 	if (user.Nip != request.Nip) {
@@ -186,6 +193,16 @@ func (h *NurseHandler) UpdateNurse(c *gin.Context) {
 
 func (h *NurseHandler) DeleteNurse(c *gin.Context) {
 	userId := c.Param("userId")
+	user, err := h.iNurseUsecase.GetNurseByID(userId)
+	if err != nil {
+		log.Println("Update bad request ", err)
+		c.JSON(404, gin.H{"status": "bad request", "message": "userId not found"})
+	}
+	nStr := strconv.FormatInt(user.Nip, 10)
+	if !strings.HasPrefix(nStr, "303") {
+		c.JSON(404, gin.H{"status": "bad request", "message": "user not found"})
+			return
+	}
 	statusCode := h.iNurseUsecase.DeleteNurse(userId)
 
 	c.JSON(statusCode, gin.H{"status": statusCode})
