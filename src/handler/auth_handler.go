@@ -161,7 +161,7 @@ func (h *AuthHandler) LoginNurse(c *gin.Context) {
 func ValidateRegisterRequest(nip int64, name, password string) error {
 	// Validate email format
 	if !isValidNip(nip) {
-		return errors.New("nip must be in valid email format")
+		return errors.New("nip invalid")
 	}
 
 	// Validate name length
@@ -210,7 +210,8 @@ func ValidateLoginNurseRequest(nip int64, password string) error {
 // TODO fix to the correct nip validation
 func isValidNip(nip int64) bool {
 	// Regular expression pattern for email format
-	nipRegex := `^615[12][2-9][0-9]{3}(0[1-9]|1[0-2])[0-9]{3}$`
+	nipRegex := `^615[12](200[0-9]|201[0-9]|202[0-4])(0[1-9]|1[0-2])\d{3,5}$`
+
 	match, _ := regexp.MatchString(nipRegex, strconv.FormatInt(nip, 10))
 	return match
 }
