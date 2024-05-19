@@ -132,6 +132,7 @@ func (h *PatientHandler) GetRecords(c *gin.Context) {
 	query := c.Request.URL.Query()
 	params := parseQueryParamsGetRecords(query)
 
+
 	records, err := h.iPatientUsecase.GetRecords(params)
 
 	if err != nil {
@@ -216,7 +217,7 @@ func parseQueryParamsGetRecords(query url.Values) dto.RequestGetRecord {
 	}
 
 	if createdByUserID := query.Get("createdBy.userId"); createdByUserID != "" {
-		params.CreatedBy.Nip = createdByUserID
+		params.CreatedBy.UserID = createdByUserID
 	}
 
 	if createdAt := query.Get("createdAt"); createdAt == "asc" || createdAt == "desc" {

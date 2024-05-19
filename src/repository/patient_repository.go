@@ -122,13 +122,11 @@ func (ur *PatientRepository) GetRecords(ctx context.Context, request dto.Request
 	}
 
 	if request.CreatedBy.UserID != "" {
-		query += " AND users.id = ?"
-		params = append(params, request.CreatedBy.UserID)
+		query += fmt.Sprintf(" AND users.user_id = '%s'", request.CreatedBy.UserID)
 	}
 
 	if request.CreatedBy.Nip != "" {
-		query += " AND users.nip = ?"
-		params = append(params, request.CreatedBy.Nip)
+		query += fmt.Sprintf(" AND users.user_id = '%s'", request.CreatedBy.Nip)
 	}
 
 	if request.CreatedAt != "" {

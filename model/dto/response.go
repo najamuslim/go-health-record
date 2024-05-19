@@ -31,7 +31,7 @@ type MedicalRecords struct {
 		BirthDate           string `json:"birthDate"`
 		Gender              string `json:"gender"`
 		IdentityCardScanImg string `json:"identityCardScanImg"`
-	} `json:"IdentityDetail"`
+	} `json:"identityDetail"`
 	Symptoms    string    `json:"symptoms"`
 	Medications string    `json:"medications"`
 	CreatedAt   time.Time `json:"createdAt"`
