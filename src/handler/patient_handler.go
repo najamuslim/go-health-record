@@ -298,14 +298,6 @@ func validateGender(gender string) bool {
 	return gender == "male" || gender == "female"
 }
 
-// func isValidURL(str string) bool {
-// 	u, err := url.Parse(str)
-// 	if err != nil || u.Scheme == "" || (u.Scheme != "http" && u.Scheme != "https") {
-// 		return false
-// 	}
-// 	return true
-// }
-
 func isValidURL(input string) bool {
 	// Parse the URL to check for basic URL structure
 	parsedURL, err := url.ParseRequestURI(input)
