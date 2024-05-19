@@ -58,7 +58,7 @@ func (h *ImageHandler) UploadImage(c *gin.Context) {
 	}
 
 	file, handler, err := c.Request.FormFile("file")
-	if err != nil {
+	if file == nil || err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "File is required"})
 		return
 	}
@@ -92,7 +92,7 @@ func (h *ImageHandler) UploadImage(c *gin.Context) {
 
 	// Respond with the URL of the uploaded file
 	imageURL := fmt.Sprintf("https://%s.s3.amazonaws.com/%s", os.Getenv("AWS_S3_BUCKET_NAME"), fileName)
-	c.JSON(http.StatusCreated, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"message": "File uploaded successfully",
 		"data": gin.H{
 			"imageUrl": imageURL,
