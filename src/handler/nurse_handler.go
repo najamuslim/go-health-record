@@ -177,6 +177,12 @@ func (h *NurseHandler) UpdateNurse(c *gin.Context) {
 		c.JSON(404, gin.H{"status": "bad request", "message": "user not found"})
 			return
 	}
+	exists, _ := h.iNurseUsecase.GetNurseByNIP(request.Nip)
+	if exists {
+		log.Println("Update bad request ", err)
+		c.JSON(409, gin.H{"status": "bad request", "message": "nip already exists"})
+		return
+	}
 
 	// Validate request payload
 	err = ValidateRegisterNurseRequest(request.Nip, request.Name)
@@ -184,15 +190,6 @@ func (h *NurseHandler) UpdateNurse(c *gin.Context) {
 		log.Println("Update bad request ", err)
 		c.JSON(400, gin.H{"status": "bad request", "message": err.Error()})
 		return
-	}
-
-	if (user.Nip != request.Nip) {
-		exists, _ := h.iNurseUsecase.GetNurseByNIP(request.Nip)
-		if exists {
-			log.Println("Update bad request ", err)
-			c.JSON(409, gin.H{"status": "bad request", "message": "nip already exists"})
-			return
-		}
 	}
 	
 	statusCode := h.iNurseUsecase.UpdateNurse(userId, request)
