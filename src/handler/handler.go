@@ -22,3 +22,7 @@ type PatientHandlerInterface interface {
   CreatePatient(c *gin.Context)
   GetPatients(c *gin.Context)  
 }
+
+type ImageHandlerInterface interface {
+	UploadImage(c *gin.Context)
+}

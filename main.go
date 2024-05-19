@@ -81,6 +81,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(authUsecase)
 	nurseHandler := handler.NewNurseHandler(nurseUscase)
 	patientHandler := handler.NewPatientHandler(patientUsecase)
+	imageHandler := handler.NewImageHandler()
 
 	// ROUTE
 	r.GET("/health", func(c *gin.Context) {
@@ -105,9 +106,12 @@ func main() {
 	itAuthorized.DELETE("/v1/user/nurse/:userId", nurseHandler.DeleteNurse)
 	itAuthorized.PUT("/v1/user/nurse/:userId/access", nurseHandler.AddAccess)
 	
-	
+	// Manage medical records
 	authorized.POST("/v1/medical/patient", patientHandler.CreatePatient)
 	authorized.GET("/v1/medical/patient", patientHandler.GetPatients)
+
+	// upload image
+	authorized.POST("/v1/image", imageHandler.UploadImage)
 
 	r.Run()
 }
