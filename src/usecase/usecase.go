@@ -23,8 +23,9 @@ type NurseUsecaseInterface interface {
 }
 
 type PatientUsecaseInterface interface {
-	RegisterPatient(dto.RequestCreatePatient) (error)
+	RegisterPatient(dto.RequestCreatePatient) error
 	GetPatientByIdentityNumber(identityNumber int) (bool, error)
 	GetPatients(request dto.RequestGetPatients) ([]dto.PatientDTO, error)
+	GetRecords(request dto.RequestGetRecord) ([]dto.MedicalRecords, error)
+	CreateRecord(request dto.RequestCreateRecord) error
 }
-

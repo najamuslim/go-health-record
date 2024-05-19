@@ -19,8 +19,10 @@ type NurseHandlerInterface interface {
 }
 
 type PatientHandlerInterface interface {
-  CreatePatient(c *gin.Context)
-  GetPatients(c *gin.Context)  
+	CreatePatient(c *gin.Context)
+	GetPatients(c *gin.Context)
+	CreateRecord(c *gin.Context)
+	GetRecords(c *gin.Context)
 }
 
 type ImageHandlerInterface interface {

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"health-record/model/dto"
 	"health-record/src/usecase"
 	"log"
@@ -11,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator"
 	"github.com/relvacode/iso8601"
 )
 
@@ -41,7 +43,7 @@ func (h *PatientHandler) CreatePatient(c *gin.Context) {
 
 	//error 409
 	exist, _ := h.iPatientUsecase.GetPatientByIdentityNumber(request.IdentityNumber)
-	if(exist) {
+	if exist {
 		log.Println("Register patient bad request >> GetPatientByIdentityNumber")
 		c.JSON(409, gin.H{"status": "bad request", "message": "IdentityNumber already registered"})
 		return
@@ -49,7 +51,7 @@ func (h *PatientHandler) CreatePatient(c *gin.Context) {
 
 	//create
 	err = h.iPatientUsecase.RegisterPatient(request)
-	
+
 	//error 500
 	if err != nil {
 		log.Println("Register patient error ", err)
@@ -69,18 +71,84 @@ func (h *PatientHandler) GetPatients(c *gin.Context) {
 
 	patients, err := h.iPatientUsecase.GetPatients(params)
 
-	
 	if err != nil {
 		log.Println("get patients server error ", err)
 		c.JSON(500, gin.H{"status": "internal server error", "message": err})
 		return
 	}
-	
-	if len(patients) < 1 {patients = []dto.PatientDTO{}}
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": patients})
 
+	if len(patients) < 1 {
+		patients = []dto.PatientDTO{}
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": patients})
 }
 
+func (h *PatientHandler) CreateRecord(c *gin.Context) {
+	var request dto.RequestCreateRecord
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		log.Println("Register record bad request >> ShouldBindJSON")
+		c.JSON(400, gin.H{"status": "bad request", "message": err.Error()})
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(request)
+	if err != nil {
+		// Validation failed
+		for _, err := range err.(validator.ValidationErrors) {
+			fmt.Printf("Error: Field '%s' failed on the '%s' tag\n", err.StructField(), err.Tag())
+		}
+		c.JSON(400, gin.H{"status": "bad request", "message": err.Error()})
+		return
+	}
+
+	//error 404
+	filter := dto.RequestGetRecord{
+		IdentityDetail: dto.IdentityDetail{
+			IdentityNumber: request.IdentityNumber,
+		},
+	}
+	exist, _ := h.iPatientUsecase.GetRecords(filter)
+	if len(exist) == 0 || err != nil {
+		log.Println("Create request is not exist >> GetRecords")
+		c.JSON(404, gin.H{"status": "not exist", "message": "IdentityNumber not exist"})
+		return
+	}
+
+	userID, _ := c.Get("user_id")
+	request.CreatedBy = userID.(string)
+
+	err = h.iPatientUsecase.CreateRecord(request)
+	if err != nil {
+		log.Println("Create record error ", err)
+		c.JSON(500, gin.H{"status": "internal server error", "message": err.Error()})
+		return
+	}
+
+	//success 201
+	c.JSON(201, gin.H{
+		"message": "Medical record successfully added",
+	})
+}
+
+func (h *PatientHandler) GetRecords(c *gin.Context) {
+	query := c.Request.URL.Query()
+	params := parseQueryParamsGetRecords(query)
+
+	records, err := h.iPatientUsecase.GetRecords(params)
+
+	if err != nil {
+		log.Println("get records server error ", err)
+		c.JSON(500, gin.H{"status": "internal server error", "message": err})
+		return
+	}
+
+	if len(records) < 1 {
+		records = []dto.MedicalRecords{}
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": records})
+}
 
 func parseQueryParams(query url.Values) dto.RequestGetPatients {
 	params := dto.RequestGetPatients{
@@ -123,6 +191,45 @@ func parseQueryParams(query url.Values) dto.RequestGetPatients {
 	return params
 }
 
+func parseQueryParamsGetRecords(query url.Values) dto.RequestGetRecord {
+	params := dto.RequestGetRecord{
+		Limit:  5,
+		Offset: 0,
+	}
+
+	if identityNumber := query.Get("identityNumber"); identityNumber != "" {
+		if id, err := strconv.Atoi(identityNumber); err == nil {
+			params.IdentityDetail.IdentityNumber = id
+		}
+	}
+
+	if limit := query.Get("limit"); limit != "" {
+		if l, err := strconv.Atoi(limit); err == nil {
+			params.Limit = l
+		}
+	}
+
+	if offset := query.Get("offset"); offset != "" {
+		if o, err := strconv.Atoi(offset); err == nil {
+			params.Offset = o
+		}
+	}
+
+	if createdByNip := query.Get("createdBy.nip"); createdByNip != "" {
+		params.CreatedBy.Nip = createdByNip
+	}
+
+	if createdByUserID := query.Get("createdBy.userId"); createdByUserID != "" {
+		params.CreatedBy.Nip = createdByUserID
+	}
+
+	if createdAt := query.Get("createdAt"); createdAt == "asc" || createdAt == "desc" {
+		params.CreatedAt = createdAt
+	}
+
+	return params
+}
+
 func ValidateRegisterPatientRequest(request dto.RequestCreatePatient) error {
 	if !is16DigitInteger(request.IdentityNumber) {
 		return errors.New("invalid IdentityNumber")
@@ -152,32 +259,32 @@ func ValidateRegisterPatientRequest(request dto.RequestCreatePatient) error {
 }
 
 func is16DigitInteger(num int) bool {
-    if num >= 1000000000000000 && num <= 9999999999999999 {
-        return true
-    }
-    return false
+	if num >= 1000000000000000 && num <= 9999999999999999 {
+		return true
+	}
+	return false
 }
 
 func validatePhoneNumber(phone string) bool {
-    if !strings.HasPrefix(phone, "+62") {
-        return false
-    }
+	if !strings.HasPrefix(phone, "+62") {
+		return false
+	}
 
-    length := len(phone)
-    if length < 10 || length > 15 {
-        return false
-    }
+	length := len(phone)
+	if length < 10 || length > 15 {
+		return false
+	}
 
-    return true
+	return true
 }
 
 func validateName(name string) bool {
-    length := len(name)
-    if length < 3 || length > 30 {
-        return false
-    }
+	length := len(name)
+	if length < 3 || length > 30 {
+		return false
+	}
 
-    return true
+	return true
 }
 
 func validateDateFormat(date string) bool {

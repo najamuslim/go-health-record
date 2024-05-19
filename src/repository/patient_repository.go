@@ -48,7 +48,7 @@ func (r *PatientRepository) CreatePatient(ctx context.Context, request dto.Reque
 func (r *PatientRepository) GetPatientByIdentityNumber(ctx context.Context, identityNumber int) (response database.Patient, err error) {
 	err = r.db.QueryRowContext(ctx, "SELECT identity_number FROM patients WHERE identity_number = $1", identityNumber).Scan(&response.IdentityNumber)
 	if err != nil {
-		
+
 		return database.Patient{}, err
 	}
 	return response, nil
@@ -107,4 +107,96 @@ func (ur *PatientRepository) GetPatients(ctx context.Context, param dto.RequestG
 	}
 
 	return patients, nil
+}
+
+func (ur *PatientRepository) GetRecords(ctx context.Context, request dto.RequestGetRecord) ([]dto.MedicalRecords, error) {
+	var records []dto.MedicalRecords
+
+	query := "SELECT medical_records.identity_number, medical_records.symptoms, medical_records.medications, medical_records.created_by, medical_records.created_at FROM medical_records LEFT JOIN users ON medical_records.created_by = users.name WHERE 1=1"
+	var params []interface{}
+
+	if request.IdentityDetail.IdentityNumber != 0 {
+		query += " AND medical_records.identity_number = ?"
+		params = append(params, request.IdentityDetail.IdentityNumber)
+	}
+
+	if request.CreatedBy.UserID != "" {
+		query += " AND users.id = ?"
+		params = append(params, request.CreatedBy.UserID)
+	}
+
+	if request.CreatedBy.Nip != "" {
+		query += " AND users.nip = ?"
+		params = append(params, request.CreatedBy.Nip)
+	}
+
+	if request.CreatedAt != "" {
+		query += " ORDER BY medical_records.created_at " + request.CreatedAt
+	}
+
+	if request.Limit > 0 {
+		query += " LIMIT ?"
+		params = append(params, request.Limit)
+	}
+
+	if request.Offset >= 0 {
+		query += " OFFSET ?"
+		params = append(params, request.Offset)
+	}
+
+	rows, err := ur.db.QueryContext(ctx, query, params...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var ptn dto.MedicalRecords
+		if err := rows.Scan(
+			&ptn.IdentityDetail.IdentityNumber,
+			&ptn.IdentityDetail.PhoneNumber,
+			&ptn.IdentityDetail.Name,
+			&ptn.IdentityDetail.BirthDate,
+			&ptn.IdentityDetail.Gender,
+			&ptn.IdentityDetail.IdentityCardScanImg,
+			&ptn.Symptoms,
+			&ptn.Medications,
+			&ptn.CreatedBy.Name,
+			&ptn.CreatedBy.Nip,
+			&ptn.CreatedBy.UserId,
+			&ptn.CreatedAt); err != nil {
+			return nil, err
+		}
+
+		records = append(records, ptn)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return records, nil
+}
+
+func (ur *PatientRepository) CreateRecord(ctx context.Context, data database.MedicalRecord) (err error) {
+	query := `
+	INSERT INTO medical_records (
+		identity_number,
+		symptoms,
+		medications,
+		created_by,
+		created_at)
+	VALUES ($1, $2, $3, $4, $5)`
+
+	_, err = ur.db.ExecContext(
+		ctx,
+		query,
+		data.IdentityNumber,
+		data.Symptoms,
+		data.Medications,
+		data.CreatedBy,
+		data.CreatedAt,
+	)
+
+	return err
 }

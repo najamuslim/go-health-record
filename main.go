@@ -31,17 +31,17 @@ func main() {
 	}
 
 	dbName := os.Getenv("DB_NAME")
-    dbPort := os.Getenv("DB_PORT")
-    dbHost := os.Getenv("DB_HOST")
-    dbUsername := os.Getenv("DB_USERNAME")
-    dbPassword := os.Getenv("DB_PASSWORD")
-    dbParams := os.Getenv("DB_PARAMS")
+	dbPort := os.Getenv("DB_PORT")
+	dbHost := os.Getenv("DB_HOST")
+	dbUsername := os.Getenv("DB_USERNAME")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbParams := os.Getenv("DB_PARAMS")
 
-    // Construct the connection string
-    connectionString := fmt.Sprintf(
-        "postgres://%s:%s@%s:%s/%s?%s",
-        dbUsername, dbPassword, dbHost, dbPort, dbName, dbParams,
-    )
+	// Construct the connection string
+	connectionString := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?%s",
+		dbUsername, dbPassword, dbHost, dbPort, dbName, dbParams,
+	)
 
 	postgreConfig := properties.PostgreConfig{
 		DatabaseURL: connectionString,
@@ -105,10 +105,12 @@ func main() {
 	itAuthorized.PUT("/v1/user/nurse/:userId", nurseHandler.UpdateNurse)
 	itAuthorized.DELETE("/v1/user/nurse/:userId", nurseHandler.DeleteNurse)
 	itAuthorized.PUT("/v1/user/nurse/:userId/access", nurseHandler.AddAccess)
-	
+
 	// Manage medical records
 	authorized.POST("/v1/medical/patient", patientHandler.CreatePatient)
 	authorized.GET("/v1/medical/patient", patientHandler.GetPatients)
+	authorized.POST("/v1/medical/record", patientHandler.CreateRecord)
+	authorized.GET("/v1/medical/record", patientHandler.GetRecords)
 
 	// upload image
 	authorized.POST("/v1/image", imageHandler.UploadImage)

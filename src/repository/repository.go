@@ -25,4 +25,6 @@ type PatientRepositoryInterface interface {
 	CreatePatient(ctx context.Context, request dto.RequestCreatePatient) (err error)
 	GetPatientByIdentityNumber(ctx context.Context, identityNumber int) (database.Patient, error)
 	GetPatients(ctx context.Context, params dto.RequestGetPatients) ([]dto.PatientDTO, error)
+	GetRecords(ctx context.Context, request dto.RequestGetRecord) ([]dto.MedicalRecords, error)
+	CreateRecord(ctx context.Context, data database.MedicalRecord) (err error)
 }
