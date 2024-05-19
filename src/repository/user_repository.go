@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"health-record/model/database"
 	"math/rand"
-	"strconv"
 	"time"
+
+	"github.com/docker/distribution/uuid"
 )
 
 type UserRepository struct {
@@ -40,7 +41,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, data database.User) (er
 	_, err = r.db.ExecContext(
 		ctx,
 		query,
-		time.Now().UTC().Format("2006-01-02 15:04:05") + strconv.Itoa(randomInt(1, 100000)),
+		uuid.Generate().String(),
 		data.Nip,
 		data.Name,
 		data.Password,

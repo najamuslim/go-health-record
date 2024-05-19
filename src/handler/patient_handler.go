@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -297,10 +298,16 @@ func validateGender(gender string) bool {
 	return gender == "male" || gender == "female"
 }
 
-func isValidURL(str string) bool {
-	u, err := url.Parse(str)
-	if err != nil || u.Scheme == "" || (u.Scheme != "http" && u.Scheme != "https") {
+func isValidURL(input string) bool {
+	// Parse the URL to check for basic URL structure
+	parsedURL, err := url.ParseRequestURI(input)
+	if err != nil {
 		return false
 	}
-	return true
+
+	// Regex to check for a valid domain in the URL
+	domainRegex := regexp.MustCompile(`^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+
+	// Check if the host part of the URL matches the domain regex
+	return domainRegex.MatchString(parsedURL.Host)
 }

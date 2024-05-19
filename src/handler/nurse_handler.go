@@ -22,6 +22,7 @@ func NewNurseHandler(iNurseUsecase usecase.NurseUsecaseInterface) NurseHandlerIn
 	return &NurseHandler{iNurseUsecase}
 }
 
+
 func (h *NurseHandler) RegisterNurse(c *gin.Context) {
 	var request dto.RequestCreateNurse
 	err := c.ShouldBindJSON(&request)
@@ -30,12 +31,26 @@ func (h *NurseHandler) RegisterNurse(c *gin.Context) {
 		c.JSON(400, gin.H{"status": "bad request", "message": err})
 		return
 	}
+	
+	fmt.Println("request.IdentityCardScanImg>>>>>>>>>>>>>>", request.IdentityCardScanImg)
+	fmt.Println("isValidURL(request.IdentityCardScanImg)>>>>>>>>>>>>>>", isValidURL(request.IdentityCardScanImg))
+	if !isValidURL(request.IdentityCardScanImg) {
+		log.Println("Register bad request > invalid IdentityCardScanImg", err)
+		c.JSON(400, gin.H{"status": "bad request", "message": "invalid IdentityCardScanImg"})
+		return
+	}
 
 	// Validate request payload
 	err = ValidateRegisterNurseRequest(request.Nip, request.Name)
 	if err != nil {
 		log.Println("Register bad request ", err)
 		c.JSON(400, gin.H{"status": "bad request", "message": err.Error()})
+		return
+	}
+
+	if request.IdentityCardScanImg == "" {
+		log.Println("Register bad request > invalid IdentityCardScanImg")
+		c.JSON(400, gin.H{"status": "bad request", "message": "invalid IdentityCardScanImg"})
 		return
 	}
 
