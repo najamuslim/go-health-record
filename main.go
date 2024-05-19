@@ -104,7 +104,7 @@ func main() {
 	itAuthorized.GET("/v1/user", nurseHandler.GetUsers)
 	itAuthorized.PUT("/v1/user/nurse/:userId", nurseHandler.UpdateNurse)
 	itAuthorized.DELETE("/v1/user/nurse/:userId", nurseHandler.DeleteNurse)
-	itAuthorized.PUT("/v1/user/nurse/:userId/access", nurseHandler.AddAccess)
+	itAuthorized.POST("/v1/user/nurse/:userId/access", nurseHandler.AddAccess)
 
 	// Manage medical records
 	authorized.POST("/v1/medical/patient", patientHandler.CreatePatient)
