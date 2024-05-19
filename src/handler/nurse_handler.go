@@ -38,6 +38,12 @@ func (h *NurseHandler) RegisterNurse(c *gin.Context) {
 		return
 	}
 
+	if request.IdentityCardScanImg == "" {
+		log.Println("Register bad request > invalid IdentityCardScanImg")
+		c.JSON(400, gin.H{"status": "bad request", "message": "invalid IdentityCardScanImg"})
+		return
+	}
+
 	// Check if email already exists
 	exists, _ := h.iNurseUsecase.GetNurseByNIP(request.Nip)
 	if exists {

@@ -132,6 +132,12 @@ func (h *AuthHandler) LoginNurse(c *gin.Context) {
 		return
 	}
 
+	if request.Nip == 0 {
+		log.Println("Register bad request > invalid IdentityCardScanImg")
+		c.JSON(400, gin.H{"status": "bad request", "message": "invalid IdentityCardScanImg"})
+		return
+	}
+	
 	nStr := strconv.FormatInt(request.Nip, 10)
 	if !strings.HasPrefix(nStr, "303") {
 		c.JSON(404, gin.H{"status": "bad request", "message": "user not found"})

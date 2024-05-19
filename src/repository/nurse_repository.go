@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/docker/distribution/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -40,7 +41,7 @@ func (repo *NurseRepository) CreateNurse(ctx context.Context, nurse dto.RequestC
 	// Prepare the SQL query to insert the new nurse with the hashed password
 	const query = `INSERT INTO users (user_id, nip, name, role, identity_card_scan_img, password, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING user_id`
 	var userId string
-	err = repo.db.QueryRowContext(ctx, query, time.Now().UTC().Format("2006-01-02 15:04:05") + strconv.Itoa(randomInt(1, 100000)), nurse.Nip, nurse.Name, "nurse", nurse.IdentityCardScanImg, hashedPassword, time.Now()).Scan(&userId)
+	err = repo.db.QueryRowContext(ctx, query, uuid.Generate().String(), nurse.Nip, nurse.Name, "nurse", nurse.IdentityCardScanImg, hashedPassword, time.Now()).Scan(&userId)
 	if err != nil {
 			return "", err
 	}
