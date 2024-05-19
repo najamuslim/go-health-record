@@ -112,11 +112,12 @@ func (ur *PatientRepository) GetPatients(ctx context.Context, param dto.RequestG
 func (ur *PatientRepository) GetRecords(ctx context.Context, request dto.RequestGetRecord) ([]dto.MedicalRecords, error) {
 	var records []dto.MedicalRecords
 
-	query := "SELECT medical_records.identity_number, medical_records.symptoms, medical_records.medications, medical_records.created_by, medical_records.created_at FROM medical_records LEFT JOIN users ON medical_records.created_by = users.name WHERE 1=1"
+	query := "SELECT medical_records.symptoms, medical_records.medications, medical_records.created_at, users.name AS created_by_name, users.nip AS created_by_nip, users.user_id AS created_by_user_id, patients.phone_number, patients.identity_number, patients.name, patients.birth_date, patients.gender, patients.identity_card_scan_img FROM medical_records LEFT JOIN patients ON medical_records.identity_number = patients.identity_number LEFT JOIN users ON medical_records.created_by = users.user_id WHERE 1=1"
+
 	var params []interface{}
 
 	if request.IdentityDetail.IdentityNumber != 0 {
-		query += " AND medical_records.identity_number = ?"
+		query += " AND medical_records.identity_number = CAST(? AS VARCHAR)"
 		params = append(params, request.IdentityDetail.IdentityNumber)
 	}
 
@@ -134,15 +135,7 @@ func (ur *PatientRepository) GetRecords(ctx context.Context, request dto.Request
 		query += " ORDER BY medical_records.created_at " + request.CreatedAt
 	}
 
-	if request.Limit > 0 {
-		query += " LIMIT ?"
-		params = append(params, request.Limit)
-	}
-
-	if request.Offset >= 0 {
-		query += " OFFSET ?"
-		params = append(params, request.Offset)
-	}
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d", request.Limit, request.Offset)
 
 	rows, err := ur.db.QueryContext(ctx, query, params...)
 	if err != nil {
@@ -153,18 +146,19 @@ func (ur *PatientRepository) GetRecords(ctx context.Context, request dto.Request
 	for rows.Next() {
 		var ptn dto.MedicalRecords
 		if err := rows.Scan(
+			&ptn.Symptoms,
+			&ptn.Medications,
+			&ptn.CreatedAt,
+			&ptn.CreatedBy.Name,
+			&ptn.CreatedBy.Nip,
+			&ptn.CreatedBy.UserId,
 			&ptn.IdentityDetail.IdentityNumber,
 			&ptn.IdentityDetail.PhoneNumber,
 			&ptn.IdentityDetail.Name,
 			&ptn.IdentityDetail.BirthDate,
 			&ptn.IdentityDetail.Gender,
 			&ptn.IdentityDetail.IdentityCardScanImg,
-			&ptn.Symptoms,
-			&ptn.Medications,
-			&ptn.CreatedBy.Name,
-			&ptn.CreatedBy.Nip,
-			&ptn.CreatedBy.UserId,
-			&ptn.CreatedAt); err != nil {
+		); err != nil {
 			return nil, err
 		}
 
