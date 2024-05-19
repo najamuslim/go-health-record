@@ -10,7 +10,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -247,8 +246,7 @@ func ValidateRegisterNurseRequest(nip int64, name string) error {
 }
 
 func isValidNipNurse(nip int64) bool {
-	currentYear := time.Now().Year()
-	nipRegex := fmt.Sprintf(`^303[12](200[0-%d]|20[01][0-9]|202[0-%d])(0[1-9]|1[0-2])[0-9]{3}$`, currentYear%10, currentYear%10)
+	nipRegex := fmt.Sprintf(`^303[12](200[0-9]|201[0-9]|202[0-4])(0[1-9]|1[0-2])\d{3,5}$`)
 	// Convert the nip int64 to a string
 	nipStr := strconv.FormatInt(nip, 10)
 	// Match the string with the regex
