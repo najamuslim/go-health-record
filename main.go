@@ -15,7 +15,6 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	// "github.com/golang-migrate/migrate/v4"
 	// _ "github.com/golang-migrate/migrate/v4/database/postgres"
 	// _ "github.com/golang-migrate/migrate/v4/source/file"
@@ -24,11 +23,12 @@ import (
 func main() {
 	r := server.InitServer()
 
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Error loading .env file:", err)
-		return
-	}
+	// godotenv.Load()
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	fmt.Println("Error loading .env file:", err)
+	// 	return
+	// }
 
 	dbName := os.Getenv("DB_NAME")
 	dbPort := os.Getenv("DB_PORT")
@@ -42,6 +42,8 @@ func main() {
 		"postgres://%s:%s@%s:%s/%s?%s",
 		dbUsername, dbPassword, dbHost, dbPort, dbName, dbParams,
 	)
+
+	fmt.Println("connectionString>>>>>>", connectionString)
 
 	postgreConfig := properties.PostgreConfig{
 		DatabaseURL: connectionString,
